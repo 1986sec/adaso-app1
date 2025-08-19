@@ -158,19 +158,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Kullanıcı bilgilerini yükle
     const aktifKullanici = localStorage.getItem('aktifKullanici');
     if (aktifKullanici) {
-        try {
-            const userInfo = await apiRequest('/user/profile');
-            const isim = userInfo.adsoyad ? userInfo.adsoyad.split(' ')[0] : aktifKullanici;
-            const userNameEl = document.getElementById('userName');
-            const userAvatarEl = document.querySelector('.user-avatar');
-            if (userNameEl) userNameEl.innerText = isim;
-            if (userAvatarEl) userAvatarEl.innerText = isim.charAt(0).toUpperCase();
-        } catch {
-            const userNameEl = document.getElementById('userName');
-            const userAvatarEl = document.querySelector('.user-avatar');
-            if (userNameEl) userNameEl.innerText = aktifKullanici;
-            if (userAvatarEl) userAvatarEl.innerText = aktifKullanici.charAt(0).toUpperCase();
-        }
+        const userNameEl = document.getElementById('userName');
+        const userAvatarEl = document.querySelector('.user-avatar');
+        if (userNameEl) userNameEl.innerText = aktifKullanici;
+        if (userAvatarEl) userAvatarEl.innerText = aktifKullanici.charAt(0).toUpperCase();
     }
     
     // Dashboard verilerini yükle
@@ -207,6 +198,16 @@ async function loadDashboardData() {
         
     } catch (error) {
         console.error('Dashboard yükleme hatası:', error);
+        // Hata durumunda kullanıcı dostu mesaj göster
+        const totalFirmsEl = document.getElementById('totalFirms');
+        const totalMeetingsEl = document.getElementById('totalMeetings');
+        const totalIncomeEl = document.getElementById('totalIncome');
+        const totalExpenseEl = document.getElementById('totalExpense');
+        
+        if (totalFirmsEl) totalFirmsEl.textContent = '0';
+        if (totalMeetingsEl) totalMeetingsEl.textContent = '0';
+        if (totalIncomeEl) totalIncomeEl.textContent = '0 ₺';
+        if (totalExpenseEl) totalExpenseEl.textContent = '0 ₺';
     }
 }
 
