@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADASO - Ziyaretler</title>
+    <link rel="stylesheet" href="../css/anasayfa.css">
+    <link rel="icon" type="image/png" href="../adanas.png">
+    <link rel="shortcut icon" type="image/png" href="../adanas.png">
+    <link rel="apple-touch-icon" href="../adanas.png">
+    <style>
+        .status.completed { background: #d4edda; color: #155724; }
+        .status.planned { background: #fff3cd; color: #856404; }
+        .status.cancelled { background: #f8d7da; color: #721c24; }
+        .modal-btn.secondary {
+            background: #6c757d;
+            color: white;
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+        }
+        .modal-btn.secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #B22222;
+            border-radius: 3px;
+        }
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #8B1A1A;
+        }
+        .detail-row {
+            background: #f8f9fa;
+            border-left: 3px solid #B22222;
+        }
+        .detail-row td {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>ADASO</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="anasayfa.html">📊 Ana Sayfa</a></li>
+            <li><a href="firmalar.html">🏢 Firmalar</a></li>
+            <li><a href="ziyaretler.html">🚗 Ziyaretler</a></li>
+            <li><a href="gelir-gider.html">💰 Gelir-Gider</a></li>
+            <li><a href="raporlar.html">📈 Raporlar</a></li>
+        </ul>
+    </div>
+    
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-section" onclick="window.location.href='anasayfa.html'" style="cursor: pointer;">
+                <h1 class="company-name">ADASO</h1>
+                <span class="company-subtitle">Yönetim Sistemi</span>
+            </div>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Ziyaret ara...">
+            <button class="search-btn">🔍</button>
+        </div>
+        <div class="user-section">
+            <div class="user-profile" onclick="toggleUserMenu()">
+                <div class="user-avatar"></div>
+                <span id="userName">Kullanıcı</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            <div id="userDropdown" class="user-dropdown">
+                <a href="ayarlar.html">⚙️ Ayarlar</a>
+                <hr>
+                <a href="index.html" onclick="cikisYap()">🚪 Çıkış</a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="content">
+        <div class="page-header">
+            <h2>🚗 Ziyaret Yönetimi</h2>
+            <button class="add-btn" onclick="openAddModal()">+ Yeni Ziyaret Ekle</button>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">🚗</div>
+                <div class="stat-info">
+                    <h3 id="totalZiyaret">0</h3>
+                    <p>Toplam Ziyaret</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3 id="tamamlananZiyaret">0</h3>
+                    <p>Tamamlandı</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                    <h3 id="planlananZiyaret">0</h3>
+                    <p>Planlandı</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sections-container">
+            <div class="section full-width">
+                <h3>📋 Ziyaret Listesi</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Firma</th>
+                            <th>Ziyaretçi</th>
+                            <th>Amaç</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ziyaretTable">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #666;">Henüz ziyaret kaydı bulunmuyor</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ziyaret Ekleme/Düzenleme Modal -->
+    <div id="ziyaretModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">🚗 Yeni Ziyaret Ekle</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tarih <span class="required">*</span></label>
+                        <input type="date" id="ziyaretTarihi" class="modal-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Saat <span class="required">*</span></label>
+                        <input type="time" id="ziyaretSaati" class="modal-input" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Firma <span class="required">*</span></label>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="firma" class="modal-input" style="flex: 1;" onchange="toggleCustomFirma()" required>
+                            <option value="">Firma Seçiniz</option>
+                            <option value="custom">+ Yeni Firma Ekle</option>
+                        </select>
+                        <input type="text" id="customFirma" class="modal-input" style="flex: 1; display: none;" placeholder="Yeni firma adı">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ziyaretçi <span class="required">*</span></label>
+                    <input type="text" id="ziyaretci" class="modal-input" placeholder="Ziyaretçi adı" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ziyaret Amacı <span class="required">*</span></label>
+                    <input type="text" id="amac" class="modal-input" placeholder="Ziyaret amacı" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Durum</label>
+                    <select id="durum" class="modal-input">
+                        <option value="Planlandı">Planlandı</option>
+                        <option value="Tamamlandı">Tamamlandı</option>
+                        <option value="İptal Edildi">İptal Edildi</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Notlar</label>
+                    <textarea id="notlar" class="modal-input" rows="3" placeholder="Ziyaret notları"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Detaylı Bilgi</label>
+                    <textarea id="detayliBilgi" class="modal-input" rows="4" placeholder="Görüşme hakkında detaylı bilgi, karar alınan konular, sonraki adımlar vb."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Katılımcılar</label>
+                        <input type="text" id="katilimcilar" class="modal-input" placeholder="Görüşmeye katılan diğer kişiler">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Lokasyon</label>
+                        <input type="text" id="lokasyon" class="modal-input" placeholder="Görüşme yeri">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Dosya Ekle</label>
+                    <input type="file" id="dosya" class="modal-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.txt" multiple>
+                    <small style="color: #666; font-size: 12px;">PDF, Word, Excel, resim dosyaları yükleyebilirsiniz</small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Gelir Tutarı (₺)</label>
+                        <input type="number" id="gelirTutari" class="modal-input" placeholder="0" min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Gider Tutarı (₺)</label>
+                        <input type="number" id="giderTutari" class="modal-input" placeholder="0" min="0" step="0.01">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Finansal Açıklama</label>
+                    <input type="text" id="finansalAciklama" class="modal-input" placeholder="Gelir/gider açıklaması">
+                </div>
+                
+                <div class="form-actions" style="border-top: none; padding-top: 10px;">
+                    <button type="button" class="modal-btn secondary" onclick="closeModal()">İptal</button>
+                    <button type="button" class="modal-btn primary" onclick="saveZiyaret()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/ziyaretler.js"></script>
+</body>
+</html>

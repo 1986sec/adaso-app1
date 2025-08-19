@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADASO - Gelir-Gider</title>
+    <link rel="stylesheet" href="../css/anasayfa.css">
+    <link rel="icon" type="image/png" href="../adanas.png">
+    <link rel="shortcut icon" type="image/png" href="../adanas.png">
+    <link rel="apple-touch-icon" href="../adanas.png">
+    <style>
+        .status.visited { background: #d4edda; color: #155724; }
+        .status.not-visited { background: #f8d7da; color: #721c24; }
+        .detail-row {
+            background: #f8f9fa;
+            border-left: 3px solid #B22222;
+        }
+        .detail-row td {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>ADASO</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="anasayfa.html">📊 Ana Sayfa</a></li>
+            <li><a href="firmalar.html">🏢 Firmalar</a></li>
+            <li><a href="ziyaretler.html">🚗 Ziyaretler</a></li>
+            <li><a href="gelir-gider.html">💰 Gelir-Gider</a></li>
+            <li><a href="raporlar.html">📈 Raporlar</a></li>
+        </ul>
+    </div>
+    
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-section" onclick="window.location.href='anasayfa.html'" style="cursor: pointer;">
+                <h1 class="company-name">ADASO</h1>
+                <span class="company-subtitle">Yönetim Sistemi</span>
+            </div>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Arama yapın...">
+            <button class="search-btn">🔍</button>
+        </div>
+        <div class="user-section">
+            <div class="user-profile" onclick="toggleUserMenu()">
+                <div class="user-avatar"></div>
+                <span id="userName">Kullanıcı</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            <div id="userDropdown" class="user-dropdown">
+                <a href="ayarlar.html">⚙️ Ayarlar</a>
+                <hr>
+                <a href="index.html" onclick="cikisYap()">🚪 Çıkış</a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="content">
+        <div class="page-header">
+            <h2>💰 Gelir-Gider Yönetimi</h2>
+
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-info">
+                    <h3 id="totalIncome">2.450.000 ₺</h3>
+                    <p>Toplam Gelir</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📉</div>
+                <div class="stat-info">
+                    <h3 id="totalExpense">1.890.000 ₺</h3>
+                    <p>Toplam Gider</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                    <h3 id="netProfit">560.000 ₺</h3>
+                    <p>Net Kar</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sections-container">
+            <div class="section full-width">
+                <h3>📋 Gelir-Gider Kayıtları</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Açıklama</th>
+                            <th>Kategori</th>
+                            <th>Tutar</th>
+                            <th>Tip</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTable">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #666;">Henüz ziyaret gelir-gider kaydı bulunmuyor</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kayıt Ekleme/Düzenleme Modal -->
+    <div id="recordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">💰 Yeni Kayıt Ekle</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tarih <span class="required">*</span></label>
+                    <input type="date" id="recordDate" class="modal-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Açıklama <span class="required">*</span></label>
+                    <input type="text" id="recordDescription" class="modal-input" placeholder="Açıklama giriniz" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Kategori <span class="required">*</span></label>
+                        <select id="recordCategory" class="modal-input" required>
+                            <option value="">Kategori Seçiniz</option>
+                            <option value="Proje Geliri">Proje Geliri</option>
+                            <option value="Hizmet Geliri">Hizmet Geliri</option>
+                            <option value="Diğer Gelir">Diğer Gelir</option>
+                            <option value="Sabit Gider">Sabit Gider</option>
+                            <option value="Değişken Gider">Değişken Gider</option>
+                            <option value="Diğer Gider">Diğer Gider</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tip <span class="required">*</span></label>
+                        <select id="recordType" class="modal-input" required>
+                            <option value="">Tip Seçiniz</option>
+                            <option value="Gelir">Gelir</option>
+                            <option value="Gider">Gider</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tutar <span class="required">*</span></label>
+                    <input type="number" id="recordAmount" class="modal-input" placeholder="0.00" min="0" step="0.01" required>
+                </div>
+                
+                <div class="form-actions" style="border-top: none; padding-top: 10px;">
+                    <button type="button" class="modal-btn primary" onclick="saveRecord()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/anasayfa.js"></script>
+    <script>
+
+        function openAddModal() {
+            editingRecordId = null;
+            document.getElementById('modalTitle').innerText = '💰 Yeni Kayıt Ekle';
+            document.getElementById('recordModal').style.display = 'block';
+            clearForm();
+            history.pushState({modal: true}, '', '');
+        }
+        
+        function closeModal() {
+            document.getElementById('recordModal').style.display = 'none';
+        }
+        
+        function clearForm() {
+            document.getElementById('recordDate').value = '';
+            document.getElementById('recordDescription').value = '';
+            document.getElementById('recordCategory').value = '';
+            document.getElementById('recordType').value = '';
+            document.getElementById('recordAmount').value = '';
+        }
+        
+        function saveRecord() {
+            const date = document.getElementById('recordDate').value;
+            const description = document.getElementById('recordDescription').value;
+            const category = document.getElementById('recordCategory').value;
+            const type = document.getElementById('recordType').value;
+            const amount = document.getElementById('recordAmount').value;
+            
+            if (!date || !description || !category || !type || !amount) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+            
+            let gelirGider = JSON.parse(localStorage.getItem('gelirGider')) || [];
+            
+            const recordData = {
+                id: editingRecordId || Date.now(),
+                tarih: date,
+                aciklama: description,
+                kategori: category,
+                tur: type,
+                tutar: parseFloat(amount)
+            };
+            
+            if (editingRecordId) {
+                const index = gelirGider.findIndex(k => k.id === editingRecordId);
+                if (index !== -1) {
+                    gelirGider[index] = recordData;
+                }
+                editingRecordId = null;
+            } else {
+                gelirGider.push(recordData);
+            }
+            
+            localStorage.setItem('gelirGider', JSON.stringify(gelirGider));
+            loadGelirGider();
+            updateStats();
+            closeModal();
+        }
+        
+        function viewDetail(id) {
+            const existingDetail = document.querySelector('.detail-row');
+            if (existingDetail) {
+                existingDetail.remove();
+                return;
+            }
+            
+            const gelirGider = JSON.parse(localStorage.getItem('gelirGider')) || [];
+            const kayit = gelirGider.find(k => k.id === id);
+            
+            if (kayit) {
+                let firmaDetay = '';
+                if (kayit.ziyaretId) {
+                    const ziyaretler = JSON.parse(localStorage.getItem('ziyaretler')) || [];
+                    const ziyaret = ziyaretler.find(z => z.id === kayit.ziyaretId);
+                    if (ziyaret) {
+                        const firmalar = JSON.parse(localStorage.getItem('firmalar')) || [];
+                        const firma = firmalar.find(f => f.firmaAdi === ziyaret.firma);
+                        if (firma) {
+                            firmaDetay = `
+                                <div style="margin: 15px 0; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #007bff;">
+                                    <div style="font-weight: 600; margin-bottom: 8px; color: #007bff;">Firma Detayları:</div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
+                                        <div><strong>Firma:</strong> ${firma.firmaAdi}</div>
+                                        <div><strong>Sektör:</strong> ${firma.sektor}</div>
+                                        <div><strong>Yetkili:</strong> ${firma.yetkiliKisi}</div>
+                                        <div><strong>Telefon:</strong> ${firma.telefon}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+                
+                const rows = document.querySelectorAll('#recordsTable tr');
+                let targetRow = null;
+                
+                rows.forEach(row => {
+                    const detailBtn = row.querySelector('.detail-btn');
+                    if (detailBtn && detailBtn.onclick.toString().includes(id)) {
+                        targetRow = row;
+                    }
+                });
+                
+                if (targetRow) {
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row';
+                    detailRow.innerHTML = `
+                        <td colspan="6" style="padding: 0;">
+                            <div style="padding: 15px; background: #f8f9fa; border-left: 3px solid #B22222;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; margin-bottom: 10px; text-align: left;">
+                                    <div><strong>Tarih:</strong> ${kayit.tarih}</div>
+                                    <div><strong>Tip:</strong> ${kayit.tur}</div>
+                                    <div><strong>Tutar:</strong> ${kayit.tutar} ₺</div>
+                                    <div><strong>Kategori:</strong> ${kayit.kategori || '-'}</div>
+                                </div>
+                                <div style="margin-bottom: 10px; font-size: 0.9rem;"><strong>Açıklama:</strong> ${kayit.aciklama}</div>
+                                ${firmaDetay}
+                                ${kayit.ziyaretId ? `<div style="margin-bottom: 10px; font-size: 0.9rem; color: #666;">Ziyaret kaydından otomatik oluşturuldu</div>` : ''}
+                                <button onclick="hideDetail()" style="background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-top: 10px; font-size: 0.8rem;">Gizle</button>
+                            </div>
+                        </td>
+                    `;
+                    
+                    targetRow.parentNode.insertBefore(detailRow, targetRow.nextSibling);
+                    history.pushState({detail: true}, '', '');
+                }
+            }
+        }
+        
+        function hideDetail() {
+            const detailRow = document.querySelector('.detail-row');
+            if (detailRow) {
+                detailRow.remove();
+            }
+        }
+        
+        function openAddModal() {
+            document.getElementById('modalTitle').innerText = '💰 Yeni Kayıt Ekle';
+            document.getElementById('recordModal').style.display = 'block';
+            clearForm();
+        }
+        
+        function closeModal() {
+            document.getElementById('recordModal').style.display = 'none';
+        }
+        
+        function clearForm() {
+            document.getElementById('recordDate').value = '';
+            document.getElementById('recordDescription').value = '';
+            document.getElementById('recordCategory').value = '';
+            document.getElementById('recordType').value = '';
+            document.getElementById('recordAmount').value = '';
+        }
+        
+        function saveRecord() {
+            const date = document.getElementById('recordDate').value;
+            const description = document.getElementById('recordDescription').value;
+            const category = document.getElementById('recordCategory').value;
+            const type = document.getElementById('recordType').value;
+            const amount = document.getElementById('recordAmount').value;
+            
+            if (!date || !description || !category || !type || !amount) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+            
+            let gelirGider = JSON.parse(localStorage.getItem('gelirGider')) || [];
+            
+            const recordData = {
+                id: Date.now(),
+                tarih: date,
+                aciklama: description,
+                kategori: category,
+                tur: type,
+                tutar: parseFloat(amount)
+            };
+            
+            gelirGider.push(recordData);
+            localStorage.setItem('gelirGider', JSON.stringify(gelirGider));
+            loadGelirGider();
+            updateStats();
+            closeModal();
+        }
+        
+
+        
+        function editRecord(id) {
+            const gelirGider = JSON.parse(localStorage.getItem('gelirGider')) || [];
+            const kayit = gelirGider.find(k => k.id === id);
+            
+            if (kayit && kayit.ziyaretId) {
+                localStorage.setItem('editZiyaretId', kayit.ziyaretId);
+                window.location.href = 'ziyaretler.html';
+            } else {
+                alert('Bu kayıt düzenlenemez.');
+            }
+        }
+        
+        function deleteRecord(id) {
+            if (confirm('Bu kaydı silmek istediğinizden emin misiniz?')) {
+                let gelirGider = JSON.parse(localStorage.getItem('gelirGider')) || [];
+                gelirGider = gelirGider.filter(kayit => kayit.id !== id);
+                localStorage.setItem('gelirGider', JSON.stringify(gelirGider));
+                loadGelirGider();
+                updateStats();
+            }
+        }
+        
+        function loadGelirGider() {
+            const gelirGider = JSON.parse(localStorage.getItem('gelirGider')) || [];
+            const tbody = document.querySelector('#recordsTable');
+            tbody.innerHTML = '';
+            
+            gelirGider.forEach(kayit => {
+                const row = document.createElement('tr');
+                const typeClass = kayit.tur === 'Gelir' ? 'income' : 'expense';
+                const amountPrefix = kayit.tur === 'Gelir' ? '+' : '-';
+                const statusClass = kayit.tur === 'Gelir' ? 'visited' : 'not-visited';
+                
+                row.innerHTML = `
+                    <td>${kayit.tarih}</td>
+                    <td>${kayit.aciklama}</td>
+                    <td>${kayit.kategori || '-'}</td>
+                    <td class="${typeClass}">${amountPrefix}${parseFloat(kayit.tutar).toLocaleString('tr-TR')} ₺</td>
+                    <td><span class="status ${statusClass}">${kayit.tur}</span></td>
+                    <td>
+                        <button class="detail-btn" onclick="viewDetail(${kayit.id})" title="Detay Gör">👁️</button>
+                        <button class="edit-btn" onclick="editRecord(${kayit.id})" title="Düzenle">✏️</button>
+                        <button class="delete-btn" onclick="deleteRecord(${kayit.id})" title="Sil">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            if (gelirGider.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Henüz gelir-gider kaydı bulunmuyor</td></tr>';
+            }
+        }
+        
+        function updateStats() {
+            const gelirGider = JSON.parse(localStorage.getItem('gelirGider')) || [];
+            
+            let totalIncome = 0;
+            let totalExpense = 0;
+            
+            gelirGider.forEach(kayit => {
+                const tutar = parseFloat(kayit.tutar) || 0;
+                if (kayit.tur === 'Gelir') {
+                    totalIncome += tutar;
+                } else if (kayit.tur === 'Gider') {
+                    totalExpense += tutar;
+                }
+            });
+            
+            const netProfit = totalIncome - totalExpense;
+            
+            document.getElementById('totalIncome').textContent = totalIncome.toLocaleString('tr-TR') + ' ₺';
+            document.getElementById('totalExpense').textContent = totalExpense.toLocaleString('tr-TR') + ' ₺';
+            document.getElementById('netProfit').textContent = netProfit.toLocaleString('tr-TR') + ' ₺';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const aktifKullanici = localStorage.getItem('aktifKullanici');
+            if (aktifKullanici) {
+                try {
+                    const veri = JSON.parse(localStorage.getItem(aktifKullanici));
+                    const isim = veri.adsoyad ? veri.adsoyad.split(' ')[0] : aktifKullanici;
+                    document.getElementById('userName').innerText = isim;
+                    document.querySelector('.user-avatar').innerText = isim.charAt(0).toUpperCase();
+                } catch {
+                    document.getElementById('userName').innerText = aktifKullanici;
+                    document.querySelector('.user-avatar').innerText = aktifKullanici.charAt(0).toUpperCase();
+                }
+            }
+            
+            loadGelirGider();
+            updateStats();
+        });
+        
+        window.addEventListener('popstate', function(event) {
+            if (document.getElementById('recordModal').style.display === 'block') {
+                closeModal();
+            }
+            if (document.querySelector('.detail-row')) {
+                hideDetail();
+            }
+        });
+        
+        document.addEventListener('click', function(event) {
+            const userSection = document.querySelector('.user-section');
+            const dropdown = document.getElementById('userDropdown');
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger');
+            
+            if (!userSection.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+            
+            if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+        
+        function searchRecords() {
+            const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+            const gelirGider = JSON.parse(localStorage.getItem('gelirGider')) || [];
+            const tbody = document.querySelector('#recordsTable');
+            tbody.innerHTML = '';
+            
+            const filteredRecords = gelirGider.filter(kayit => 
+                kayit.aciklama.toLowerCase().includes(searchTerm) ||
+                kayit.tur.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filteredRecords.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Arama sonucu bulunamadı</td></tr>';
+                return;
+            }
+            
+            filteredRecords.forEach(kayit => {
+                const row = document.createElement('tr');
+                const typeClass = kayit.tur === 'Gelir' ? 'income' : 'expense';
+                const amountPrefix = kayit.tur === 'Gelir' ? '+' : '-';
+                const statusClass = kayit.tur === 'Gelir' ? 'visited' : 'not-visited';
+                
+                row.innerHTML = `
+                    <td>${kayit.tarih}</td>
+                    <td>${kayit.aciklama}</td>
+                    <td>${kayit.kategori || '-'}</td>
+                    <td class="${typeClass}">${amountPrefix}${parseFloat(kayit.tutar).toLocaleString('tr-TR')} ₺</td>
+                    <td><span class="status ${statusClass}">${kayit.tur}</span></td>
+                    <td>
+                        <button class="detail-btn" onclick="viewDetail(${kayit.id})" title="Detay Gör">👁️</button>
+                        <button class="edit-btn" onclick="editRecord(${kayit.id})" title="Düzenle">✏️</button>
+                        <button class="delete-btn" onclick="deleteRecord(${kayit.id})" title="Sil">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        document.querySelector('.search-btn').addEventListener('click', searchRecords);
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchRecords();
+        });
+    </script>
+</body>
+</html>

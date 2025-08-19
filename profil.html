@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADASO - Profil Düzenle</title>
+    <link rel="stylesheet" href="../css/anasayfa.css">
+    <link rel="icon" type="image/png" href="../adanas.png">
+    <link rel="shortcut icon" type="image/png" href="../adanas.png">
+    <link rel="apple-touch-icon" href="../adanas.png">
+    <style>
+        .profile-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .current-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #B22222;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #B22222;
+            box-shadow: 0 0 0 3px rgba(165, 42, 42, 0.1);
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, #B22222 0%, #B22222 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(165, 42, 42, 0.3);
+            width: 100%;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(165, 42, 42, 0.4);
+        }
+        .back-btn {
+            background: #B22222;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: -40px;
+            display: inline-block;
+        }
+        .back-btn:hover {
+            background: #8B1A1A;
+            transform: translateY(-1px);
+        }
+        .content {
+            padding-top: 10px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>ADASO</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="anasayfa.html">📊 Ana Sayfa</a></li>
+            <li><a href="firmalar.html">🏢 Firmalar</a></li>
+            <li><a href="ziyaretler.html">🚗 Ziyaretler</a></li>
+            <li><a href="gelir-gider.html">💰 Gelir-Gider</a></li>
+            <li><a href="raporlar.html">📈 Raporlar</a></li>
+        </ul>
+    </div>
+    
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-section" onclick="window.location.href='anasayfa.html'" style="cursor: pointer;">
+                <h1 class="company-name">ADASO</h1>
+                <span class="company-subtitle">Yönetim Sistemi</span>
+            </div>
+        </div>
+        <div class="search-container" style="visibility: hidden;">
+            <input type="text" class="search-input" placeholder="">
+            <button class="search-btn">🔍</button>
+        </div>
+        <div class="user-section">
+            <div class="user-profile" onclick="toggleUserMenu()">
+                <div class="user-avatar"></div>
+                <span id="userName">Kullanıcı</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            <div id="userDropdown" class="user-dropdown">
+                <a href="ayarlar.html">⚙️ Ayarlar</a>
+                <hr>
+                <a href="#" onclick="return cikisYap()">🚪 Çıkış</a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="content">
+        <a href="ayarlar.html" class="back-btn">← Ayarlara Dön</a>
+        
+        <div class="page-header">
+            <h2>👤 Profil Düzenle</h2>
+        </div>
+        
+        <div class="profile-container">
+            <div class="profile-card">
+                <div class="current-info">
+                    <h3 style="margin-bottom: 15px; color: #333;">Mevcut Bilgiler</h3>
+                    <div class="info-row">
+                        <span class="info-label">Kullanıcı Adı:</span>
+                        <span class="info-value" id="currentUsername">admin</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">E-posta:</span>
+                        <span class="info-value" id="currentEmail">admin@adaso.com</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Telefon:</span>
+                        <span class="info-value" id="currentPhone">+90 322 123 45 67</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ad Soyad:</span>
+                        <span class="info-value" id="currentFullName">Yönetici</span>
+                    </div>
+                </div>
+                
+
+                
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label class="form-label">Ad Soyad:</label>
+                        <input type="text" class="form-input" id="newFullName" placeholder="Ad ve soyad">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kullanıcı Adı:</label>
+                        <input type="text" class="form-input" id="newUsername" placeholder="Yeni kullanıcı adı">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">E-posta:</label>
+                        <input type="email" class="form-input" id="newEmail" placeholder="Yeni e-posta adresi">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Telefon:</label>
+                        <input type="tel" class="form-input" id="newPhone" placeholder="Yeni telefon numarası">
+                    </div>
+                    <button type="submit" class="save-btn">Profili Güncelle</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/profil.js"></script>
+</body>
+</html>
