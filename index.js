@@ -116,8 +116,13 @@ const girisYap = async () => {
 
         if (response.ok) {
             const data = await response.json();
+            console.log('Backend response:', data); // Debug için
+            
+            // Kullanıcı adını farklı yollarla almaya çalış
+            let kullaniciAdi = data.user?.kullaniciAdi || data.user?.username || data.username || girilen;
+            
             mesaj.textContent = "✅ Giriş Başarılı!";
-            localStorage.setItem("aktifKullanici", data.user.kullaniciAdi);
+            localStorage.setItem("aktifKullanici", kullaniciAdi);
             localStorage.setItem("authToken", data.token);
 
             if (hatirla) {
