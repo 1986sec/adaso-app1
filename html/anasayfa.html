@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADASO - Anasayfa</title>
+    <link rel="stylesheet" href="../css/anasayfa.css">
+    <style>
+        .status.planlandı { background: #fff3cd; color: #856404; }
+        .status.ziyaret-edilmedi { background: #f8d7da; color: #721c24; }
+        .status.görüşme-yapılan { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>ADASO</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="anasayfa.html">📊 Ana Sayfa</a></li>
+            <li><a href="firmalar.html">🏢 Firmalar</a></li>
+            <li><a href="ziyaretler.html">🚗 Ziyaretler</a></li>
+            <li><a href="gelir-gider.html">💰 Gelir-Gider</a></li>
+            <li><a href="raporlar.html">📈 Raporlar</a></li>
+        </ul>
+    </div>
+    
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-section">
+                <h1 class="company-name">ADASO</h1>
+                <span class="company-subtitle">Yönetim Sistemi</span>
+            </div>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Arama yapın...">
+            <button class="search-btn">🔍</button>
+        </div>
+        <div class="user-section">
+            <div class="user-profile" onclick="toggleUserMenu()">
+                <div class="user-avatar"></div>
+                <span id="userName">Kullanıcı</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            <div id="userDropdown" class="user-dropdown">
+                <a href="ayarlar.html">⚙️ Ayarlar</a>
+                <hr>
+                <a href="#" onclick="return cikisYap()">🚪 Çıkış</a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="content">
+        <div class="page-header">
+            <h2>📊 Anasayfa</h2>
+            <p class="page-subtitle">Genel bakış ve önemli veriler</p>
+        </div>
+        <div class="stats-container">
+            <div class="stat-card" onclick="window.location.href='firmalar.html'" style="cursor: pointer;">
+                <div class="stat-icon">🏢</div>
+                <div class="stat-info">
+                    <h3 id="totalFirms">0</h3>
+                    <p>Toplam Firma Sayısı</p>
+                </div>
+            </div>
+            
+            <div class="stat-card" onclick="window.location.href='ziyaretler.html'" style="cursor: pointer;">
+                <div class="stat-icon">💬</div>
+                <div class="stat-info">
+                    <h3 id="totalMeetings">0</h3>
+                    <p>Görüşme Yapılan Firma</p>
+                </div>
+            </div>
+            
+            <div class="stat-card" onclick="window.location.href='gelir-gider.html'" style="cursor: pointer;">
+                <div class="stat-icon">💰</div>
+                <div class="stat-info">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <span style="color: #22543d; font-size: 1.2rem; font-weight: 600;">Gelir: <span id="totalIncome">0 ₺</span></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #742a2a; font-size: 1.2rem; font-weight: 600;">Gider: <span id="totalExpense">0 ₺</span></span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        
+        <div class="sections-container">
+            <div class="section full-width">
+                <h3 id="tableTitle">🏢 Son Eklenen Firmalar</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Son Ziyaret</th>
+                            <th>Firma Adı</th>
+                            <th>Yetkili Kişi</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentMeetings">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #666;">Henüz firma kaydı bulunmuyor</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/anasayfa.js"></script>
+</body>
+</html>

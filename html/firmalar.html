@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADASO - Firmalar</title>
+    <link rel="stylesheet" href="../css/anasayfa.css">
+    <style>
+        /* Firmalar sayfasına özel stiller */
+        .modal-btn.secondary {
+            background: #6c757d;
+            color: white;
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+        }
+        .modal-btn.secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+        .status.visited {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.not-visited {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .detail-row {
+            background: #f8f9fa;
+            border-left: 3px solid #B22222;
+        }
+        .detail-row td {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-row td:first-child {
+            font-weight: 500;
+            color: #666;
+            width: 120px;
+        }
+        .detail-row td:last-child {
+            text-align: right;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>ADASO</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="anasayfa.html">📊 Ana Sayfa</a></li>
+            <li><a href="firmalar.html">🏢 Firmalar</a></li>
+            <li><a href="ziyaretler.html">🚗 Ziyaretler</a></li>
+            <li><a href="gelir-gider.html">💰 Gelir-Gider</a></li>
+            <li><a href="raporlar.html">📈 Raporlar</a></li>
+        </ul>
+    </div>
+    
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-section" onclick="window.location.href='anasayfa.html'" style="cursor: pointer;">
+                <h1 class="company-name">ADASO</h1>
+                <span class="company-subtitle">Yönetim Sistemi</span>
+            </div>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Firma ara...">
+            <button class="search-btn">🔍</button>
+        </div>
+        <div class="user-section">
+            <div class="user-profile" onclick="toggleUserMenu()">
+                <div class="user-avatar"></div>
+                <span id="userName">Kullanıcı</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            <div id="userDropdown" class="user-dropdown">
+                <a href="ayarlar.html">⚙️ Ayarlar</a>
+                <hr>
+                <a href="index.html" onclick="cikisYap()">🚪 Çıkış</a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="content">
+        <div class="page-header">
+            <h2>🏢 Firma Yönetimi</h2>
+            <div>
+                <button class="add-btn" onclick="openAddModal()">+ Yeni Firma Ekle</button>
+                <button class="add-btn" style="margin-left: 10px; background: #6c757d; box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);" onclick="resetFirmalarStats()">Sayıları Sıfırla</button>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">🏢</div>
+                <div class="stat-info">
+                    <h3>0</h3>
+                    <p>Toplam Firma</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3>0</h3>
+                    <p>Ziyaret Edildi</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <h3>0</h3>
+                    <p>Beklemede</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sections-container">
+            <div class="section full-width">
+                <h3>📋 Firma Listesi</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Firma Adı</th>
+                            <th>Sektör</th>
+                            <th>Telefon</th>
+                            <th>E-posta</th>
+                            <th>Yetkili Kişi</th>
+                            <th>Yetkili Numarası</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="firmaTable">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #666;">Henüz firma kaydı bulunmuyor</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firma Ekleme/Düzenleme Modal -->
+    <div id="firmaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">🏢 Yeni Firma Ekle</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Firma Adı <span class="required">*</span></label>
+                    <input type="text" id="firmaAdi" class="modal-input" placeholder="Firma adını giriniz" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Sektör <span class="required">*</span></label>
+                        <select id="sektor" class="modal-input" required>
+                            <option value="">Sektör Seçiniz</option>
+                            <option value="Teknoloji">Teknoloji</option>
+                            <option value="İnşaat">İnşaat</option>
+                            <option value="Otomotiv">Otomotiv</option>
+                            <option value="Gıda">Gıda</option>
+                            <option value="Tekstil">Tekstil</option>
+                            <option value="Diğer">Diğer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Telefon <span class="required">*</span></label>
+                        <input type="tel" id="telefon" class="modal-input" placeholder="0322 123 45 67" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>E-posta</label>
+                    <input type="email" id="email" class="modal-input" placeholder="info@firma.com">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Yetkili Kişi <span class="required">*</span></label>
+                        <input type="text" id="yetkiliKisi" class="modal-input" placeholder="Yetkili kişi adı" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Yetkili Numarası <span class="required">*</span></label>
+                        <input type="tel" id="yetkiliNumara" class="modal-input" placeholder="0532 123 45 67" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Adres</label>
+                    <textarea id="adres" class="modal-input" rows="3" placeholder="Firma adresi"></textarea>
+                </div>
+                
+                <div class="form-actions" style="border-top: none; padding-top: 10px;">
+                    <button type="button" class="modal-btn secondary" onclick="closeModal()">İptal</button>
+                    <button type="button" class="modal-btn primary" onclick="saveFirma()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/firmalar.js"></script>
+</body>
+</html>
