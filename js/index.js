@@ -88,19 +88,7 @@ const girisYap = async () => {
     const mesaj = document.getElementById("girisMesaj");
     const hatirla = document.getElementById("hatirlaCheckbox").checked;
 
-    if (girilen === "admin" && sifre === "123") {
-        mesaj.textContent = "✅ Giriş Başarılı!";
-        localStorage.setItem("aktifKullanici", "admin");
-        
-        if (hatirla) {
-            localStorage.setItem("hatirlaKullanici", girilen);
-        }
-        
-        setTimeout(() => {
-            window.location.href = 'anasayfa.html';
-        }, 500);
-        return;
-    }
+    // Hardcoded bypass kaldırıldı: tüm girişler API üzerinden yapılır
 
     try {
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -152,44 +140,40 @@ const sifreUnuttumKapat = () => {
     document.getElementById("sifreSifirlaBtn").style.display = "block";
 };
 
-let bulunanKullanici = null;
+let resetTokenGlobal = null;
 
-const sifreSifirla = () => {
+const sifreSifirla = async () => {
     const girilen = document.getElementById("sifreUnuttumKullanici").value.trim();
     const mesaj = document.getElementById("sifreUnuttumMesaj");
-
     if (!girilen) {
         mesaj.textContent = "⚠️ Kullanıcı adı veya e-posta giriniz.";
         mesaj.style.color = "#dc3545";
         return;
     }
-
-    let bulundu = false;
-    for(let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key === "aktifKullanici" || key === "hatirlaKullanici") continue;
-
-        try {
-            const veri = JSON.parse(localStorage.getItem(key));
-            if (key === girilen || veri.email === girilen) {
-                bulunanKullanici = key;
-                mesaj.textContent = "✅ Kullanıcı bulundu! Yeni şifrenizi belirleyin.";
-                mesaj.style.color = "#28a745";
-                document.getElementById("yeniSifreAlani").style.display = "block";
-                document.getElementById("sifreSifirlaBtn").style.display = "none";
-                bulundu = true;
-                break;
-            }
-        } catch (error) {}
-    }
-
-    if (!bulundu) {
-        mesaj.textContent = "❌ Kullanıcı bulunamadı!";
+    try {
+        const resp = await fetch(`${API_BASE_URL}/auth/forgot`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifier: girilen })
+        });
+        if (!resp.ok) {
+            mesaj.textContent = "❌ Kullanıcı bulunamadı!";
+            mesaj.style.color = "#dc3545";
+            return;
+        }
+        const data = await resp.json();
+        resetTokenGlobal = data.resetToken;
+        mesaj.textContent = "✅ Kullanıcı bulundu! Yeni şifrenizi belirleyin.";
+        mesaj.style.color = "#28a745";
+        document.getElementById("yeniSifreAlani").style.display = "block";
+        document.getElementById("sifreSifirlaBtn").style.display = "none";
+    } catch (e) {
+        mesaj.textContent = "❌ İşlem sırasında hata oluştu";
         mesaj.style.color = "#dc3545";
     }
 };
 
-const sifreGuncelle = () => {
+const sifreGuncelle = async () => {
     const yeniSifre = document.getElementById("yeniSifre").value;
     const yeniSifre2 = document.getElementById("yeniSifre2").value;
     const mesaj = document.getElementById("sifreUnuttumMesaj");
@@ -213,19 +197,30 @@ const sifreGuncelle = () => {
     }
 
     try {
-        const veri = JSON.parse(localStorage.getItem(bulunanKullanici));
-        veri.sifre = yeniSifre;
-        localStorage.setItem(bulunanKullanici, JSON.stringify(veri));
+        if (!resetTokenGlobal) {
+            mesaj.textContent = "❌ İşlem geçersiz, lütfen tekrar deneyin.";
+            mesaj.style.color = "#dc3545";
+            return;
+        }
+        const resp = await fetch(`${API_BASE_URL}/auth/reset`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: resetTokenGlobal, newPassword: yeniSifre })
+        });
+        if (!resp.ok) {
+            mesaj.textContent = "❌ Token geçersiz veya süresi doldu";
+            mesaj.style.color = "#dc3545";
+            return;
+        }
         mesaj.textContent = "✅ Şifreniz başarıyla güncellendi!";
         mesaj.style.color = "#28a745";
-        
         setTimeout(() => {
             sifreUnuttumKapat();
+            resetTokenGlobal = null;
         }, 2000);
     } catch (error) {
         mesaj.textContent = "❌ Bir hata oluştu!";
         mesaj.style.color = "#dc3545";
-        console.error('Şifre güncelleme hatası:', error);
     }
 };
 
