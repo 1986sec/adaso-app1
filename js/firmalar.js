@@ -125,6 +125,7 @@ function clearForm() {
 }
 
 async function saveFirma() {
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
     const firmaAdi = document.getElementById('firmaAdi').value;
     const sektor = document.getElementById('sektor').value;
     const telefon = document.getElementById('telefon').value;
@@ -149,6 +150,30 @@ async function saveFirma() {
     };
     
     try {
+        // Admin kullanıcısı için local storage tabanlı kaydetme
+        if (aktifKullanici === 'admin') {
+            const adminFirmalar = JSON.parse(localStorage.getItem('adminFirmalar') || '[]');
+            
+            if (editingFirmaId) {
+                const index = adminFirmalar.findIndex(f => f.id === editingFirmaId);
+                if (index !== -1) {
+                    adminFirmalar[index] = { ...adminFirmalar[index], ...firmaData };
+                }
+                editingFirmaId = null;
+            } else {
+                const nextId = adminFirmalar.length ? Math.max(...adminFirmalar.map(x => x.id || 0)) + 1 : 1;
+                firmaData.id = nextId;
+                adminFirmalar.push(firmaData);
+            }
+            
+            localStorage.setItem('adminFirmalar', JSON.stringify(adminFirmalar));
+            await loadFirmalar();
+            closeModal();
+            alert('Firma başarıyla kaydedildi!');
+            return;
+        }
+        
+        // Normal kullanıcılar için API isteği
         if (editingFirmaId) {
             await apiRequest(`/firmalar/${editingFirmaId}`, {
                 method: 'PUT',
@@ -283,10 +308,17 @@ function hideDetail() {
 
 async function loadFirmalar() {
     const tbody = document.querySelector('#firmaTable');
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
     
     try {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Yükleniyor...</td></tr>';
-        const firmalar = await apiRequest('/firmalar');
+        
+        let firmalar;
+        if (aktifKullanici === 'admin') {
+            firmalar = JSON.parse(localStorage.getItem('adminFirmalar') || '[]');
+        } else {
+            firmalar = await apiRequest('/firmalar');
+        }
         
         tbody.innerHTML = '';
         
@@ -336,9 +368,20 @@ async function loadFirmalar() {
 
 async function deleteFirma(id) {
     if (confirm('Bu firmayı silmek istediğinizden emin misiniz?')) {
+        const aktifKullanici = localStorage.getItem('aktifKullanici');
+        
         try {
-            await apiRequest(`/firmalar/${id}`, { method: 'DELETE' });
-            await loadFirmalar();
+            // Admin kullanıcısı için local storage'dan sil
+            if (aktifKullanici === 'admin') {
+                const adminFirmalar = JSON.parse(localStorage.getItem('adminFirmalar') || '[]');
+                const filteredFirmalar = adminFirmalar.filter(f => f.id !== id);
+                localStorage.setItem('adminFirmalar', JSON.stringify(filteredFirmalar));
+                await loadFirmalar();
+                alert('Firma başarıyla silindi!');
+            } else {
+                await apiRequest(`/firmalar/${id}`, { method: 'DELETE' });
+                await loadFirmalar();
+            }
         } catch (error) {
             alert('Firma silinirken hata oluştu: ' + error.message);
         }
@@ -375,6 +418,36 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!aktifKullanici) {
         window.location.href = 'index.html';
         return;
+    }
+    
+    // Admin kullanıcısı için örnek veriler ekle
+    if (aktifKullanici === 'admin') {
+        // Örnek firmalar ekle
+        if (!localStorage.getItem('adminFirmalar')) {
+            const ornekFirmalar = [
+                {
+                    id: 1,
+                    firmaAdi: 'ABC Teknoloji',
+                    sektor: 'Teknoloji',
+                    telefon: '+90 322 123 45 67',
+                    email: 'info@abcteknoloji.com',
+                    yetkiliKisi: 'Ahmet Yılmaz',
+                    yetkiliNumara: '+90 532 123 45 67',
+                    adres: 'Adana, Türkiye'
+                },
+                {
+                    id: 2,
+                    firmaAdi: 'XYZ Sanayi',
+                    sektor: 'Sanayi',
+                    telefon: '+90 322 234 56 78',
+                    email: 'iletisim@xyzsanayi.com',
+                    yetkiliKisi: 'Fatma Demir',
+                    yetkiliNumara: '+90 533 234 56 78',
+                    adres: 'Mersin, Türkiye'
+                }
+            ];
+            localStorage.setItem('adminFirmalar', JSON.stringify(ornekFirmalar));
+        }
     }
     
     try {

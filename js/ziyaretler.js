@@ -154,6 +154,7 @@ function createZiyaretRow(ziyaret) {
 }
 
 async function saveZiyaret() {
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
     const tarih = document.getElementById('ziyaretTarihi').value;
     const saat = document.getElementById('ziyaretSaati').value;
     const firmaSelect = document.getElementById('firma').value;
@@ -199,6 +200,32 @@ async function saveZiyaret() {
     };
     
     try {
+        // Admin kullanıcısı için local storage tabanlı kaydetme
+        if (aktifKullanici === 'admin') {
+            const adminZiyaretler = JSON.parse(localStorage.getItem('adminZiyaretler') || '[]');
+            
+            if (editingZiyaretId) {
+                const index = adminZiyaretler.findIndex(z => z.id === editingZiyaretId);
+                if (index !== -1) {
+                    adminZiyaretler[index] = { ...adminZiyaretler[index], ...ziyaretData };
+                }
+                editingZiyaretId = null;
+            } else {
+                const nextId = adminZiyaretler.length ? Math.max(...adminZiyaretler.map(x => x.id || 0)) + 1 : 1;
+                ziyaretData.id = nextId;
+                adminZiyaretler.push(ziyaretData);
+            }
+            
+            localStorage.setItem('adminZiyaretler', JSON.stringify(adminZiyaretler));
+            cachedZiyaretler = null;
+            await loadZiyaretler();
+            await updateZiyaretStats();
+            closeModal();
+            alert('Ziyaret başarıyla kaydedildi!');
+            return;
+        }
+        
+        // Normal kullanıcılar için API isteği
         if (editingZiyaretId) {
             await apiRequest(`/ziyaretler/${editingZiyaretId}`, {
                 method: 'PUT',
@@ -228,10 +255,20 @@ async function viewDetail(id) {
         return;
     }
     
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
+    
     try {
-        const ziyaret = cachedZiyaretler ? 
-            cachedZiyaretler.find(z => z.id === id) : 
-            (await apiRequest('/ziyaretler')).find(z => z.id === id);
+        let ziyaret;
+        
+        if (cachedZiyaretler) {
+            ziyaret = cachedZiyaretler.find(z => z.id === id);
+        } else if (aktifKullanici === 'admin') {
+            const adminZiyaretler = JSON.parse(localStorage.getItem('adminZiyaretler') || '[]');
+            ziyaret = adminZiyaretler.find(z => z.id === id);
+        } else {
+            const apiZiyaretler = await apiRequest('/ziyaretler');
+            ziyaret = apiZiyaretler.find(z => z.id === id);
+        }
         
         if (ziyaret) {
             const rows = document.querySelectorAll('#ziyaretTable tr');
@@ -312,8 +349,17 @@ function hideDetail() {
 }
 
 async function loadFirmalar() {
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
+    
     try {
-        const firmalar = await apiRequest('/firmalar');
+        let firmalar;
+        
+        if (aktifKullanici === 'admin') {
+            firmalar = JSON.parse(localStorage.getItem('adminFirmalar') || '[]');
+        } else {
+            firmalar = await apiRequest('/firmalar');
+        }
+        
         const firmaSelect = document.getElementById('firma');
         
         while (firmaSelect.children.length > 2) {
@@ -350,10 +396,20 @@ function toggleCustomFirma() {
 }
 
 async function editZiyaret(id) {
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
+    
     try {
-        const ziyaret = cachedZiyaretler ? 
-            cachedZiyaretler.find(z => z.id === id) : 
-            (await apiRequest('/ziyaretler')).find(z => z.id === id);
+        let ziyaret;
+        
+        if (cachedZiyaretler) {
+            ziyaret = cachedZiyaretler.find(z => z.id === id);
+        } else if (aktifKullanici === 'admin') {
+            const adminZiyaretler = JSON.parse(localStorage.getItem('adminZiyaretler') || '[]');
+            ziyaret = adminZiyaretler.find(z => z.id === id);
+        } else {
+            const apiZiyaretler = await apiRequest('/ziyaretler');
+            ziyaret = apiZiyaretler.find(z => z.id === id);
+        }
         
         if (ziyaret) {
             editingZiyaretId = id;
@@ -375,10 +431,17 @@ async function editZiyaret(id) {
 
 async function loadZiyaretler() {
     const tbody = document.querySelector('#ziyaretTable');
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
     
     try {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Yükleniyor...</td></tr>';
-        cachedZiyaretler = await apiRequest('/ziyaretler');
+        
+        // Admin kullanıcısı için local storage'dan veri al
+        if (aktifKullanici === 'admin') {
+            cachedZiyaretler = JSON.parse(localStorage.getItem('adminZiyaretler') || '[]');
+        } else {
+            cachedZiyaretler = await apiRequest('/ziyaretler');
+        }
         
         tbody.innerHTML = '';
         
@@ -397,10 +460,22 @@ async function loadZiyaretler() {
 
 async function deleteZiyaret(id) {
     if (confirm('Bu ziyareti silmek istediğinizden emin misiniz?')) {
+        const aktifKullanici = localStorage.getItem('aktifKullanici');
+        
         try {
-            await apiRequest(`/ziyaretler/${id}`, { method: 'DELETE' });
-            cachedZiyaretler = null;
-            await loadZiyaretler();
+            // Admin kullanıcısı için local storage'dan sil
+            if (aktifKullanici === 'admin') {
+                const adminZiyaretler = JSON.parse(localStorage.getItem('adminZiyaretler') || '[]');
+                const filteredZiyaretler = adminZiyaretler.filter(z => z.id !== id);
+                localStorage.setItem('adminZiyaretler', JSON.stringify(filteredZiyaretler));
+                cachedZiyaretler = null;
+                await loadZiyaretler();
+                alert('Ziyaret başarıyla silindi!');
+            } else {
+                await apiRequest(`/ziyaretler/${id}`, { method: 'DELETE' });
+                cachedZiyaretler = null;
+                await loadZiyaretler();
+            }
         } catch (error) {
             alert('Ziyaret silinirken hata oluştu: ' + error.message);
         }
@@ -410,6 +485,7 @@ async function deleteZiyaret(id) {
 async function searchZiyaretler() {
     const searchTerm = document.querySelector('.search-input').value.toLowerCase();
     const tbody = document.querySelector('#ziyaretTable');
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
     
     if (!searchTerm) {
         await loadZiyaretler();
@@ -418,7 +494,11 @@ async function searchZiyaretler() {
     
     try {
         if (!cachedZiyaretler) {
-            cachedZiyaretler = await apiRequest('/ziyaretler');
+            if (aktifKullanici === 'admin') {
+                cachedZiyaretler = JSON.parse(localStorage.getItem('adminZiyaretler') || '[]');
+            } else {
+                cachedZiyaretler = await apiRequest('/ziyaretler');
+            }
         }
         
         tbody.innerHTML = '';
@@ -443,8 +523,16 @@ async function searchZiyaretler() {
 }
 
 async function updateZiyaretStats() {
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
+    
     try {
-        const ziyaretler = cachedZiyaretler || await apiRequest('/ziyaretler');
+        let ziyaretler;
+        
+        if (aktifKullanici === 'admin') {
+            ziyaretler = cachedZiyaretler || JSON.parse(localStorage.getItem('adminZiyaretler') || '[]');
+        } else {
+            ziyaretler = cachedZiyaretler || await apiRequest('/ziyaretler');
+        }
         
         if (ziyaretler) {
             const totalZiyaret = ziyaretler.length;
@@ -469,6 +557,59 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!aktifKullanici) {
         window.location.href = 'index.html';
         return;
+    }
+    
+    // Admin kullanıcısı için örnek veriler ekle
+    if (aktifKullanici === 'admin') {
+        // Örnek firmalar ekle
+        if (!localStorage.getItem('adminFirmalar')) {
+            const ornekFirmalar = [
+                {
+                    id: 1,
+                    firmaAdi: 'ABC Teknoloji',
+                    sektor: 'Teknoloji',
+                    telefon: '+90 322 123 45 67',
+                    email: 'info@abcteknoloji.com',
+                    yetkiliKisi: 'Ahmet Yılmaz',
+                    yetkiliNumara: '+90 532 123 45 67',
+                    adres: 'Adana, Türkiye'
+                },
+                {
+                    id: 2,
+                    firmaAdi: 'XYZ Sanayi',
+                    sektor: 'Sanayi',
+                    telefon: '+90 322 234 56 78',
+                    email: 'iletisim@xyzsanayi.com',
+                    yetkiliKisi: 'Fatma Demir',
+                    yetkiliNumara: '+90 533 234 56 78',
+                    adres: 'Mersin, Türkiye'
+                }
+            ];
+            localStorage.setItem('adminFirmalar', JSON.stringify(ornekFirmalar));
+        }
+        
+        // Örnek ziyaretler ekle
+        if (!localStorage.getItem('adminZiyaretler')) {
+            const ornekZiyaretler = [
+                {
+                    id: 1,
+                    tarih: '2024-01-15',
+                    saat: '10:00',
+                    firma: 'ABC Teknoloji',
+                    ziyaretci: 'Mehmet Özkan',
+                    amac: 'Ürün tanıtımı',
+                    durum: 'Tamamlandı',
+                    notlar: 'Başarılı görüşme yapıldı',
+                    detayliBilgi: 'Yeni ürünlerimiz tanıtıldı',
+                    katilimcilar: 'Mehmet Özkan, Ahmet Yılmaz',
+                    lokasyon: 'ABC Teknoloji Ofisi',
+                    gelirTutari: 5000,
+                    giderTutari: 200,
+                    finansalAciklama: 'Ürün satışı gerçekleşti'
+                }
+            ];
+            localStorage.setItem('adminZiyaretler', JSON.stringify(ornekZiyaretler));
+        }
     }
     
     try {
