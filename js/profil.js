@@ -3,6 +3,28 @@ const API_BASE_URL = 'https://adaso-backend.onrender.com/api';
 async function apiRequest(endpoint, options = {}) {
     try {
         const token = localStorage.getItem('authToken');
+        const aktifKullanici = localStorage.getItem('aktifKullanici');
+        
+        // Token yoksa ve aktif kullanıcı varsa, admin kullanıcısı için özel kontrol
+        if (!token && aktifKullanici === 'admin') {
+            // Admin kullanıcısı için özel durum
+            return { 
+                kullaniciAdi: 'admin',
+                adsoyad: 'Yönetici',
+                email: 'admin@adaso.com',
+                telefon: '+90 322 123 45 67'
+            };
+        }
+        
+        // Token yoksa ve admin değilse, giriş sayfasına yönlendir
+        if (!token && aktifKullanici !== 'admin') {
+            localStorage.removeItem('aktifKullanici');
+            if (!/index\.html$/.test(window.location.pathname)) {
+                window.location.href = 'index.html';
+            }
+            return;
+        }
+        
         const authHeaders = token
             ? {
                 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
@@ -21,6 +43,16 @@ async function apiRequest(endpoint, options = {}) {
         
         if (!response.ok) {
             if (response.status === 401) {
+                // Admin kullanıcısı için özel durum - çıkış yapma
+                if (aktifKullanici === 'admin') {
+                    return { 
+                        kullaniciAdi: 'admin',
+                        adsoyad: 'Yönetici',
+                        email: 'admin@adaso.com',
+                        telefon: '+90 322 123 45 67'
+                    };
+                }
+                
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('aktifKullanici');
                 if (!/index\.html$/.test(window.location.pathname)) {
@@ -33,6 +65,16 @@ async function apiRequest(endpoint, options = {}) {
         
         return await response.json();
     } catch (error) {
+        // Admin kullanıcısı için özel durum - hata durumunda bile devam et
+        const aktifKullanici = localStorage.getItem('aktifKullanici');
+        if (aktifKullanici === 'admin') {
+            return { 
+                kullaniciAdi: 'admin',
+                adsoyad: 'Yönetici',
+                email: 'admin@adaso.com',
+                telefon: '+90 322 123 45 67'
+            };
+        }
         throw error;
     }
 }
@@ -82,10 +124,17 @@ if (profileForm) {
     profileForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
+    const aktifKullanici = localStorage.getItem('aktifKullanici');
     const newFullName = document.getElementById('newFullName').value;
     const newUsername = document.getElementById('newUsername').value;
     const newEmail = document.getElementById('newEmail').value;
     const newPhone = document.getElementById('newPhone').value;
+    
+    // Admin kullanıcısı için özel durum
+    if (aktifKullanici === 'admin') {
+        alert('Admin kullanıcısı için profil güncelleme özelliği kullanılamaz.');
+        return;
+    }
     
     const updateData = {};
     if (newFullName) updateData.adsoyad = newFullName;
@@ -113,9 +162,15 @@ if (profileForm) {
 
 document.addEventListener('DOMContentLoaded', async function() {
     const aktifKullanici = localStorage.getItem('aktifKullanici');
-    if (aktifKullanici) {
-        try {
-            const userInfo = await apiRequest('/user/profile');
+    if (!aktifKullanici) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    try {
+        const userInfo = await apiRequest('/user/profile');
+        
+        if (userInfo) {
             const isim = userInfo.adsoyad ? userInfo.adsoyad.split(' ')[0] : aktifKullanici;
             const userNameEl = document.getElementById('userName');
             const userAvatarEl = document.querySelector('.user-avatar');
@@ -131,7 +186,24 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (userInfo.email && currentEmailEl) currentEmailEl.textContent = userInfo.email;
             if (userInfo.telefon && currentPhoneEl) currentPhoneEl.textContent = userInfo.telefon;
             if (currentUsernameEl) currentUsernameEl.textContent = userInfo.kullaniciAdi || aktifKullanici;
-        } catch {
+            
+            // Admin kullanıcısı için form alanlarını devre dışı bırak
+            if (aktifKullanici === 'admin') {
+                const formInputs = document.querySelectorAll('#profileForm input');
+                formInputs.forEach(input => {
+                    input.disabled = true;
+                    input.placeholder = 'Admin kullanıcısı için devre dışı';
+                });
+                
+                const submitBtn = document.querySelector('#profileForm button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Admin kullanıcısı için devre dışı';
+                    submitBtn.style.opacity = '0.5';
+                }
+            }
+        } else {
+            // Fallback için varsayılan değerler
             const userNameEl = document.getElementById('userName');
             const userAvatarEl = document.querySelector('.user-avatar');
             const currentUsernameEl = document.getElementById('currentUsername');
@@ -140,5 +212,16 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (userAvatarEl) userAvatarEl.innerText = aktifKullanici.charAt(0).toUpperCase();
             if (currentUsernameEl) currentUsernameEl.textContent = aktifKullanici;
         }
+    } catch (error) {
+        console.error('Profil bilgileri yüklenirken hata:', error);
+        
+        // Hata durumunda varsayılan değerler
+        const userNameEl = document.getElementById('userName');
+        const userAvatarEl = document.querySelector('.user-avatar');
+        const currentUsernameEl = document.getElementById('currentUsername');
+        
+        if (userNameEl) userNameEl.innerText = aktifKullanici;
+        if (userAvatarEl) userAvatarEl.innerText = aktifKullanici.charAt(0).toUpperCase();
+        if (currentUsernameEl) currentUsernameEl.textContent = aktifKullanici;
     }
 });

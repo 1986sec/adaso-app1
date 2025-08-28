@@ -2,6 +2,23 @@ const API_BASE_URL = 'https://adaso-backend.onrender.com/api';
 async function apiRequest(endpoint, options = {}) {
     try {
         const token = localStorage.getItem('authToken');
+        const aktifKullanici = localStorage.getItem('aktifKullanici');
+        
+        // Token yoksa ve aktif kullanıcı varsa, admin kullanıcısı için özel kontrol
+        if (!token && aktifKullanici === 'admin') {
+            // Admin kullanıcısı için özel durum - boş veri döndür
+            return [];
+        }
+        
+        // Token yoksa ve admin değilse, giriş sayfasına yönlendir
+        if (!token && aktifKullanici !== 'admin') {
+            localStorage.removeItem('aktifKullanici');
+            if (!/index\.html$/.test(window.location.pathname)) {
+                window.location.href = 'index.html';
+            }
+            return;
+        }
+        
         const authHeaders = token
             ? {
                 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
@@ -20,6 +37,11 @@ async function apiRequest(endpoint, options = {}) {
         
         if (!response.ok) {
             if (response.status === 401) {
+                // Admin kullanıcısı için özel durum - çıkış yapma
+                if (aktifKullanici === 'admin') {
+                    return [];
+                }
+                
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('aktifKullanici');
                 if (!/index\.html$/.test(window.location.pathname)) {
@@ -32,6 +54,11 @@ async function apiRequest(endpoint, options = {}) {
         
         return await response.json();
     } catch (error) {
+        // Admin kullanıcısı için özel durum - hata durumunda bile devam et
+        const aktifKullanici = localStorage.getItem('aktifKullanici');
+        if (aktifKullanici === 'admin') {
+            return [];
+        }
         throw error;
     }
 }
@@ -157,12 +184,15 @@ async function calculateFinancials() {
 document.addEventListener('DOMContentLoaded', async function() {
     // Kullanıcı bilgilerini yükle
     const aktifKullanici = localStorage.getItem('aktifKullanici');
-    if (aktifKullanici) {
-        const userNameEl = document.getElementById('userName');
-        const userAvatarEl = document.querySelector('.user-avatar');
-        if (userNameEl) userNameEl.innerText = aktifKullanici;
-        if (userAvatarEl) userAvatarEl.innerText = aktifKullanici.charAt(0).toUpperCase();
+    if (!aktifKullanici) {
+        window.location.href = 'index.html';
+        return;
     }
+    
+    const userNameEl = document.getElementById('userName');
+    const userAvatarEl = document.querySelector('.user-avatar');
+    if (userNameEl) userNameEl.innerText = aktifKullanici;
+    if (userAvatarEl) userAvatarEl.innerText = aktifKullanici.charAt(0).toUpperCase();
     
     // Dashboard verilerini yükle
     await loadDashboardData();
