@@ -444,7 +444,7 @@ async function loadZiyaretler() {
         if (aktifKullanici === 'admin') {
             cachedZiyaretler = JSON.parse(localStorage.getItem('adminZiyaretler') || '[]');
         } else {
-            cachedZiyaretler = await apiRequest('/ziyaretler');
+        cachedZiyaretler = await apiRequest('/ziyaretler');
         }
         
         tbody.innerHTML = '';
@@ -476,9 +476,9 @@ async function deleteZiyaret(id) {
                 await loadZiyaretler();
                 alert('Ziyaret başarıyla silindi!');
             } else {
-                await apiRequest(`/ziyaretler/${id}`, { method: 'DELETE' });
-                cachedZiyaretler = null;
-                await loadZiyaretler();
+            await apiRequest(`/ziyaretler/${id}`, { method: 'DELETE' });
+            cachedZiyaretler = null;
+            await loadZiyaretler();
             }
         } catch (error) {
             alert('Ziyaret silinirken hata oluştu: ' + error.message);
@@ -501,7 +501,7 @@ async function searchZiyaretler() {
             if (aktifKullanici === 'admin') {
                 cachedZiyaretler = JSON.parse(localStorage.getItem('adminZiyaretler') || '[]');
             } else {
-                cachedZiyaretler = await apiRequest('/ziyaretler');
+            cachedZiyaretler = await apiRequest('/ziyaretler');
             }
         }
         
@@ -616,8 +616,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
     
-    try {
-        const userInfo = await apiRequest('/user/profile');
+        try {
+            const userInfo = await apiRequest('/user/profile');
         if (userInfo) {
             const isim = userInfo.adsoyad ? userInfo.adsoyad.split(' ')[0] : aktifKullanici;
             const userNameEl = document.getElementById('userName');

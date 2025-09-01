@@ -383,8 +383,8 @@ async function deleteFirma(id) {
                 await loadFirmalar();
                 alert('Firma başarıyla silindi!');
             } else {
-                await apiRequest(`/firmalar/${id}`, { method: 'DELETE' });
-                await loadFirmalar();
+            await apiRequest(`/firmalar/${id}`, { method: 'DELETE' });
+            await loadFirmalar();
             }
         } catch (error) {
             alert('Firma silinirken hata oluştu: ' + error.message);
@@ -454,8 +454,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
     
-    try {
-        const userInfo = await apiRequest('/user/profile');
+        try {
+            const userInfo = await apiRequest('/user/profile');
         if (userInfo) {
             const isim = userInfo.adsoyad ? userInfo.adsoyad.split(' ')[0] : aktifKullanici;
             const userNameEl = document.getElementById('userName');
