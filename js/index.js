@@ -1,12 +1,7 @@
 const API_BASE_URL = 'https://adaso-backend.onrender.com/api';
 
 function timingSafeEqual(a, b) {
-    if (a.length !== b.length) return false;
-    let result = 0;
-    for (let i = 0; i < a.length; i++) {
-        result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-    }
-    return result === 0;
+    return a === b;
 }
 
 const showForm = (tab) => {
@@ -229,18 +224,34 @@ function validatePassword(password, elementPrefix) {
     const upperReq = document.getElementById(`${elementPrefix}-req-upper`);
     const lowerReq = document.getElementById(`${elementPrefix}-req-lower`);
     const numberReq = document.getElementById(`${elementPrefix}-req-number`);
-    
+
     if (lengthReq) {
-        lengthReq.classList.toggle('valid', password.length >= 6);
+        if (password.length >= 6) {
+            lengthReq.classList.add('valid');
+        } else {
+            lengthReq.classList.remove('valid');
+        }
     }
     if (upperReq) {
-        upperReq.classList.toggle('valid', /[A-Z]/.test(password));
+        if (/[A-Z]/.test(password)) {
+            upperReq.classList.add('valid');
+        } else {
+            upperReq.classList.remove('valid');
+        }
     }
     if (lowerReq) {
-        lowerReq.classList.toggle('valid', /[a-z]/.test(password));
+        if (/[a-z]/.test(password)) {
+            lowerReq.classList.add('valid');
+        } else {
+            lowerReq.classList.remove('valid');
+        }
     }
     if (numberReq) {
-        numberReq.classList.toggle('valid', /[0-9]/.test(password));
+        if (/[0-9]/.test(password)) {
+            numberReq.classList.add('valid');
+        } else {
+            numberReq.classList.remove('valid');
+        }
     }
 }
 
@@ -256,7 +267,11 @@ function checkPasswordMatch() {
     const matchReq = document.getElementById('req-match');
     
     if (matchReq) {
-        matchReq.classList.toggle('valid', password2 && timingSafeEqual(password, password2));
+        if (password2 && timingSafeEqual(password, password2)) {
+            matchReq.classList.add('valid');
+        } else {
+            matchReq.classList.remove('valid');
+        }
     }
 }
 
@@ -272,7 +287,11 @@ function checkModalPasswordMatch() {
     const matchReq = document.getElementById('modal-req-match');
     
     if (matchReq) {
-        matchReq.classList.toggle('valid', password2 && timingSafeEqual(password, password2));
+        if (password2 && timingSafeEqual(password, password2)) {
+            matchReq.classList.add('valid');
+        } else {
+            matchReq.classList.remove('valid');
+        }
     }
 }
 
