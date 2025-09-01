@@ -221,7 +221,11 @@ async function saveZiyaret() {
             await loadZiyaretler();
             await updateZiyaretStats();
             closeModal();
-            alert('Ziyaret başarıyla kaydedildi!');
+            
+            // Bildirim gönder
+            if (window.addNotification) {
+                window.addNotification(`Yeni ziyaret eklendi: ${ziyaretData.firma} - ${ziyaretData.tarih} ${ziyaretData.saat}`, 'success');
+            }
             return;
         }
         

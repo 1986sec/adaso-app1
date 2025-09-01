@@ -169,7 +169,11 @@ async function saveFirma() {
             localStorage.setItem('adminFirmalar', JSON.stringify(adminFirmalar));
             await loadFirmalar();
             closeModal();
-            alert('Firma başarıyla kaydedildi!');
+            
+            // Bildirim gönder
+            if (window.addNotification) {
+                window.addNotification(`Yeni firma eklendi: ${firmaData.firmaAdi}`, 'success');
+            }
             return;
         }
         
