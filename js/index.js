@@ -225,9 +225,13 @@ function validatePassword(password, elementPrefix) {
     const lowerReq = document.getElementById(`${elementPrefix}-req-lower`);
     const numberReq = document.getElementById(`${elementPrefix}-req-number`);
 
+    console.log('Validating password:', password); // Debug için
+    console.log('Elements found:', { lengthReq, upperReq, lowerReq, numberReq }); // Debug için
+
     if (lengthReq) {
         if (password.length >= 6) {
             lengthReq.classList.add('valid');
+            console.log('Length requirement met'); // Debug için
         } else {
             lengthReq.classList.remove('valid');
         }
@@ -235,6 +239,7 @@ function validatePassword(password, elementPrefix) {
     if (upperReq) {
         if (/[A-Z]/.test(password)) {
             upperReq.classList.add('valid');
+            console.log('Upper requirement met'); // Debug için
         } else {
             upperReq.classList.remove('valid');
         }
@@ -242,6 +247,7 @@ function validatePassword(password, elementPrefix) {
     if (lowerReq) {
         if (/[a-z]/.test(password)) {
             lowerReq.classList.add('valid');
+            console.log('Lower requirement met'); // Debug için
         } else {
             lowerReq.classList.remove('valid');
         }
@@ -249,6 +255,7 @@ function validatePassword(password, elementPrefix) {
     if (numberReq) {
         if (/[0-9]/.test(password)) {
             numberReq.classList.add('valid');
+            console.log('Number requirement met'); // Debug için
         } else {
             numberReq.classList.remove('valid');
         }
@@ -257,6 +264,7 @@ function validatePassword(password, elementPrefix) {
 
 function checkPasswordStrength() {
     const password = document.getElementById('kayitSifre').value;
+    console.log('Password:', password); // Debug için
     validatePassword(password, 'req');
     checkPasswordMatch();
 }
