@@ -26,8 +26,13 @@ class NotificationSystem {
         `;
         notificationBtn.onclick = () => this.showNotificationPanel();
 
-        // User section'dan önce ekle
-        userSection.parentNode.insertBefore(notificationBtn, userSection);
+        // User section'ın içine ekle (user-profile'dan önce)
+        const userProfile = userSection.querySelector('.user-profile');
+        if (userProfile) {
+            userSection.insertBefore(notificationBtn, userProfile);
+        } else {
+            userSection.appendChild(notificationBtn);
+        }
 
         // Bildirim paneli oluştur
         this.createNotificationPanel();
