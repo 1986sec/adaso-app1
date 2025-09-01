@@ -389,10 +389,12 @@ label:hover {
     margin: 4px 0;
     color: #dc3545;
     transition: all 0.3s ease;
+    font-weight: 500;
 }
 
 .requirement.valid {
     color: #28a745;
+    font-weight: 600;
 }
 
 .password-container {
