@@ -177,6 +177,7 @@ async function calculateFinancials() {
         
         return { totalIncome, totalExpense };
     } catch (error) {
+        console.error('Gelir-gider hesaplama hatası:', error);
         return { totalIncome: 0, totalExpense: 0 };
     }
 }
