@@ -224,69 +224,8 @@ function validatePassword(password, elementPrefix) {
     console.log('Password:', password);
     console.log('Element prefix:', elementPrefix);
     
-    const lengthReq = document.getElementById(`${elementPrefix}-req-length`);
-    const upperReq = document.getElementById(`${elementPrefix}-req-upper`);
-    const lowerReq = document.getElementById(`${elementPrefix}-req-lower`);
-    const numberReq = document.getElementById(`${elementPrefix}-req-number`);
-
-    console.log('Elements found:', {
-        lengthReq: lengthReq ? 'Found' : 'Not found',
-        upperReq: upperReq ? 'Found' : 'Not found',
-        lowerReq: lowerReq ? 'Found' : 'Not found',
-        numberReq: numberReq ? 'Found' : 'Not found'
-    });
-
-    // Length check
-    if (lengthReq) {
-        const isLengthValid = password.length >= 6;
-        console.log('Length check:', password.length, '>= 6 =', isLengthValid);
-        if (isLengthValid) {
-            lengthReq.classList.add('valid');
-            console.log('✅ Length requirement met - class added');
-        } else {
-            lengthReq.classList.remove('valid');
-            console.log('❌ Length requirement not met - class removed');
-        }
-    }
-
-    // Upper case check
-    if (upperReq) {
-        const hasUpper = /[A-Z]/.test(password);
-        console.log('Upper check:', password, 'has uppercase =', hasUpper);
-        if (hasUpper) {
-            upperReq.classList.add('valid');
-            console.log('✅ Upper requirement met - class added');
-        } else {
-            upperReq.classList.remove('valid');
-            console.log('❌ Upper requirement not met - class removed');
-        }
-    }
-
-    // Lower case check
-    if (lowerReq) {
-        const hasLower = /[a-z]/.test(password);
-        console.log('Lower check:', password, 'has lowercase =', hasLower);
-        if (hasLower) {
-            lowerReq.classList.add('valid');
-            console.log('✅ Lower requirement met - class added');
-        } else {
-            lowerReq.classList.remove('valid');
-            console.log('❌ Lower requirement not met - class removed');
-        }
-    }
-
-    // Number check
-    if (numberReq) {
-        const hasNumber = /[0-9]/.test(password);
-        console.log('Number check:', password, 'has number =', hasNumber);
-        if (hasNumber) {
-            numberReq.classList.add('valid');
-            console.log('✅ Number requirement met - class added');
-        } else {
-            numberReq.classList.remove('valid');
-            console.log('❌ Number requirement not met - class removed');
-        }
-    }
+    // Sadece şifre eşleşme kontrolü yapılacak
+    console.log('Only password match validation will be performed');
     
     console.log('=== VALIDATION END ===');
 }
