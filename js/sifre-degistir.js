@@ -71,7 +71,6 @@ function setupForm() {
     
     if (newPassword) {
         newPassword.addEventListener('input', function() {
-            checkPasswordRequirements(this.value);
             checkPasswordMatch();
         });
     }
@@ -84,71 +83,38 @@ function setupForm() {
 }
 
 function checkPasswordRequirements(password) {
-    const lengthReq = document.getElementById('lengthReq');
-    const upperReq = document.getElementById('upperReq');
-    const lowerReq = document.getElementById('lowerReq');
-    const numberReq = document.getElementById('numberReq');
-    const passwordCheck = document.getElementById('passwordCheck');
-    
-    if (password.length >= 8) {
-        lengthReq.style.color = '#28a745';
-        lengthReq.innerHTML = '✓ En az 8 karakter';
-    } else {
-        lengthReq.style.color = '#dc3545';
-        lengthReq.innerHTML = '• En az 8 karakter';
-    }
-    
-    if (/[A-Z]/.test(password)) {
-        upperReq.style.color = '#28a745';
-        upperReq.innerHTML = '✓ En az 1 büyük harf';
-    } else {
-        upperReq.style.color = '#dc3545';
-        upperReq.innerHTML = '• En az 1 büyük harf';
-    }
-    
-    if (/[a-z]/.test(password)) {
-        lowerReq.style.color = '#28a745';
-        lowerReq.innerHTML = '✓ En az 1 küçük harf';
-    } else {
-        lowerReq.style.color = '#dc3545';
-        lowerReq.innerHTML = '• En az 1 küçük harf';
-    }
-    
-    if (/\d/.test(password)) {
-        numberReq.style.color = '#28a745';
-        numberReq.innerHTML = '✓ En az 1 rakam';
-    } else {
-        numberReq.style.color = '#dc3545';
-        numberReq.innerHTML = '• En az 1 rakam';
-    }
-    
-    if (isStrongPassword(password)) {
-        passwordCheck.style.display = 'block';
-    } else {
-        passwordCheck.style.display = 'none';
-    }
+    // Sadece şifre eşleşme kontrolü yapılacak
+    console.log('Password requirements check disabled - only match validation active');
 }
 
 function checkPasswordMatch() {
     const password = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     const matchReq = document.getElementById('matchReq');
-    const confirmCheck = document.getElementById('confirmCheck');
     
     if (confirmPassword.length > 0) {
         if (password === confirmPassword) {
             matchReq.style.color = '#28a745';
-            matchReq.innerHTML = '✓ Şifreler aynı';
-            confirmCheck.style.display = 'block';
+            matchReq.innerHTML = '✓ Şifreler uyuşuyor';
+            matchReq.style.fontWeight = '600';
+            matchReq.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
+            matchReq.style.padding = '6px 12px';
+            matchReq.style.borderRadius = '4px';
         } else {
             matchReq.style.color = '#dc3545';
-            matchReq.innerHTML = '• Şifreler aynı olmalı';
-            confirmCheck.style.display = 'none';
+            matchReq.innerHTML = '• Şifreler uyuşuyor';
+            matchReq.style.fontWeight = '500';
+            matchReq.style.backgroundColor = 'transparent';
+            matchReq.style.padding = '4px 0';
+            matchReq.style.borderRadius = '0';
         }
     } else {
         matchReq.style.color = '#dc3545';
-        matchReq.innerHTML = '• Şifreler aynı olmalı';
-        confirmCheck.style.display = 'none';
+        matchReq.innerHTML = '• Şifreler uyuşuyor';
+        matchReq.style.fontWeight = '500';
+        matchReq.style.backgroundColor = 'transparent';
+        matchReq.style.padding = '4px 0';
+        matchReq.style.borderRadius = '0';
     }
 }
 
@@ -162,10 +128,7 @@ async function changePassword() {
         return;
     }
     
-    if (!isStrongPassword(newPassword)) {
-        alert('Şifre gereksinimleri karşılanmıyor! Lütfen en az 8 karakter, 1 büyük harf, 1 küçük harf ve 1 rakam içeren bir şifre girin.');
-        return;
-    }
+    // Şifre güçlülük kontrolü kaldırıldı - sadece eşleşme kontrolü yapılıyor
     
     if (currentPassword === newPassword) {
         alert('Yeni şifre mevcut şifre ile aynı olamaz!');
