@@ -293,8 +293,14 @@ function validatePassword(password, elementPrefix) {
 
 function checkPasswordStrength() {
     console.log('=== CHECK PASSWORD STRENGTH CALLED ===');
-    const password = document.getElementById('kayitSifre').value;
+    const passwordInput = document.getElementById('kayitSifre');
+    if (!passwordInput) {
+        console.error('Password input not found!');
+        return;
+    }
+    const password = passwordInput.value;
     console.log('Password from input:', password);
+    console.log('Password length:', password.length);
     validatePassword(password, 'req');
     checkPasswordMatch();
 }
@@ -336,23 +342,51 @@ function checkModalPasswordMatch() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== DOM LOADED ===');
     
-    // Event listener'ları manuel olarak ekle
+    // Ana form event listener'ları
     const kayitSifreInput = document.getElementById('kayitSifre');
     const kayitSifre2Input = document.getElementById('kayitSifre2');
     
     if (kayitSifreInput) {
         console.log('Adding event listener to kayitSifre input');
-        kayitSifreInput.addEventListener('input', function() {
-            console.log('Input event fired on kayitSifre');
+        kayitSifreInput.addEventListener('input', function(e) {
+            console.log('Input event fired on kayitSifre, value:', e.target.value);
+            checkPasswordStrength();
+        });
+        kayitSifreInput.addEventListener('keyup', function(e) {
+            console.log('Keyup event fired on kayitSifre, value:', e.target.value);
             checkPasswordStrength();
         });
     }
     
     if (kayitSifre2Input) {
         console.log('Adding event listener to kayitSifre2 input');
-        kayitSifre2Input.addEventListener('input', function() {
-            console.log('Input event fired on kayitSifre2');
+        kayitSifre2Input.addEventListener('input', function(e) {
+            console.log('Input event fired on kayitSifre2, value:', e.target.value);
             checkPasswordMatch();
+        });
+        kayitSifre2Input.addEventListener('keyup', function(e) {
+            console.log('Keyup event fired on kayitSifre2, value:', e.target.value);
+            checkPasswordMatch();
+        });
+    }
+    
+    // Modal form event listener'ları
+    const yeniSifreInput = document.getElementById('yeniSifre');
+    const yeniSifre2Input = document.getElementById('yeniSifre2');
+    
+    if (yeniSifreInput) {
+        console.log('Adding event listener to yeniSifre input');
+        yeniSifreInput.addEventListener('input', function(e) {
+            console.log('Input event fired on yeniSifre, value:', e.target.value);
+            checkModalPasswordStrength();
+        });
+    }
+    
+    if (yeniSifre2Input) {
+        console.log('Adding event listener to yeniSifre2 input');
+        yeniSifre2Input.addEventListener('input', function(e) {
+            console.log('Input event fired on yeniSifre2, value:', e.target.value);
+            checkModalPasswordMatch();
         });
     }
     
