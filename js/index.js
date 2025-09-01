@@ -220,51 +220,81 @@ const sifreGuncelle = async () => {
 };
 
 function validatePassword(password, elementPrefix) {
+    console.log('=== VALIDATION START ===');
+    console.log('Password:', password);
+    console.log('Element prefix:', elementPrefix);
+    
     const lengthReq = document.getElementById(`${elementPrefix}-req-length`);
     const upperReq = document.getElementById(`${elementPrefix}-req-upper`);
     const lowerReq = document.getElementById(`${elementPrefix}-req-lower`);
     const numberReq = document.getElementById(`${elementPrefix}-req-number`);
 
-    console.log('Validating password:', password); // Debug için
-    console.log('Elements found:', { lengthReq, upperReq, lowerReq, numberReq }); // Debug için
+    console.log('Elements found:', {
+        lengthReq: lengthReq ? 'Found' : 'Not found',
+        upperReq: upperReq ? 'Found' : 'Not found',
+        lowerReq: lowerReq ? 'Found' : 'Not found',
+        numberReq: numberReq ? 'Found' : 'Not found'
+    });
 
+    // Length check
     if (lengthReq) {
-        if (password.length >= 6) {
+        const isLengthValid = password.length >= 6;
+        console.log('Length check:', password.length, '>= 6 =', isLengthValid);
+        if (isLengthValid) {
             lengthReq.classList.add('valid');
-            console.log('Length requirement met'); // Debug için
+            console.log('✅ Length requirement met - class added');
         } else {
             lengthReq.classList.remove('valid');
+            console.log('❌ Length requirement not met - class removed');
         }
     }
+
+    // Upper case check
     if (upperReq) {
-        if (/[A-Z]/.test(password)) {
+        const hasUpper = /[A-Z]/.test(password);
+        console.log('Upper check:', password, 'has uppercase =', hasUpper);
+        if (hasUpper) {
             upperReq.classList.add('valid');
-            console.log('Upper requirement met'); // Debug için
+            console.log('✅ Upper requirement met - class added');
         } else {
             upperReq.classList.remove('valid');
+            console.log('❌ Upper requirement not met - class removed');
         }
     }
+
+    // Lower case check
     if (lowerReq) {
-        if (/[a-z]/.test(password)) {
+        const hasLower = /[a-z]/.test(password);
+        console.log('Lower check:', password, 'has lowercase =', hasLower);
+        if (hasLower) {
             lowerReq.classList.add('valid');
-            console.log('Lower requirement met'); // Debug için
+            console.log('✅ Lower requirement met - class added');
         } else {
             lowerReq.classList.remove('valid');
+            console.log('❌ Lower requirement not met - class removed');
         }
     }
+
+    // Number check
     if (numberReq) {
-        if (/[0-9]/.test(password)) {
+        const hasNumber = /[0-9]/.test(password);
+        console.log('Number check:', password, 'has number =', hasNumber);
+        if (hasNumber) {
             numberReq.classList.add('valid');
-            console.log('Number requirement met'); // Debug için
+            console.log('✅ Number requirement met - class added');
         } else {
             numberReq.classList.remove('valid');
+            console.log('❌ Number requirement not met - class removed');
         }
     }
+    
+    console.log('=== VALIDATION END ===');
 }
 
 function checkPasswordStrength() {
+    console.log('=== CHECK PASSWORD STRENGTH CALLED ===');
     const password = document.getElementById('kayitSifre').value;
-    console.log('Password:', password); // Debug için
+    console.log('Password from input:', password);
     validatePassword(password, 'req');
     checkPasswordMatch();
 }
@@ -304,6 +334,28 @@ function checkModalPasswordMatch() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== DOM LOADED ===');
+    
+    // Event listener'ları manuel olarak ekle
+    const kayitSifreInput = document.getElementById('kayitSifre');
+    const kayitSifre2Input = document.getElementById('kayitSifre2');
+    
+    if (kayitSifreInput) {
+        console.log('Adding event listener to kayitSifre input');
+        kayitSifreInput.addEventListener('input', function() {
+            console.log('Input event fired on kayitSifre');
+            checkPasswordStrength();
+        });
+    }
+    
+    if (kayitSifre2Input) {
+        console.log('Adding event listener to kayitSifre2 input');
+        kayitSifre2Input.addEventListener('input', function() {
+            console.log('Input event fired on kayitSifre2');
+            checkPasswordMatch();
+        });
+    }
+    
     const hatirla = localStorage.getItem("hatirlaKullanici");
     if(hatirla) {
         const girisKullaniciEl = document.getElementById("girisKullanici");
